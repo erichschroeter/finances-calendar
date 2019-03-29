@@ -3,6 +3,7 @@ Analyze finances.
 
 Usage:
   finances.py cal [--categories=<categories>] [--year=<year>] [--month=<month>] <csv>
+  finances.py categories [--year=<year>] [--month=<month>] <csv>
 
 Options:
   -h --help                    Print this menu.
@@ -52,14 +53,21 @@ def print_calendar_weekly_totals(entries, year, month):
     cal_text = '\n'.join(cal_array)
     print(cal_text)
 
-def mint_dot_com_find_all(csvpath, categories):
+def mint_dot_com_find_all(csvpath, categories=None):
     rows = []
     with open(csvpath) as csvfile:
         r = csv.DictReader(csvfile)
         rows = mint_dot_com_find_all_dict_reader(r, categories)
     return rows
 
-def mint_dot_com_find_all_dict_reader(reader, categories):
+def mint_dot_com_list_categories_dict_reader(reader):
+    categories = set()
+    for row in reader:
+        if row['Category']:
+            categories.add(row['Category'])
+    return sorted(list(categories))
+
+def mint_dot_com_find_all_dict_reader(reader, categories=None):
     def clean_mint_csv_row(row):
         row_date = re.split('\\/', row['Date'])
         # Mint exports dates formatted as Month/Day/Year
@@ -74,7 +82,7 @@ def mint_dot_com_find_all_dict_reader(reader, categories):
                     cleaned_row = clean_mint_csv_row(row)
                     rows.append(cleaned_row)
         else:
-            if row['Category'] == categories:
+            if categories is None or row['Category'] == categories:
                 cleaned_row = clean_mint_csv_row(row)
                 rows.append(cleaned_row)
     return rows
@@ -91,6 +99,11 @@ def main():
     if args['cal']:
         entries = mint_dot_com_find_all(args['<csv>'], args['--categories'].split(','))
         print_calendar_weekly_totals(entries, args['--year'], args['--month'])
+    if args['categories']:
+        entries = mint_dot_com_find_all(args['<csv>'])
+        categories = mint_dot_com_list_categories_dict_reader(entries)
+        for category in categories:
+            print(category)
 
 if __name__ == '__main__':
     main()

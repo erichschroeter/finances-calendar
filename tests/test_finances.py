@@ -58,5 +58,21 @@ class TestMintCSVData(unittest.TestCase):
         self.assertAlmostEqual(weekly_totals[4], 35.24, places=2)
         self.assertAlmostEqual(weekly_totals[5], 0.0, places=2)
 
+    def test_list_categories_with_no_filter(self):
+        expected_categories = [
+            'Alcohol & Bars',
+            'Auto Insurance',
+            'Business Services',
+            'Credit Card Payment',
+            'Fast Food',
+            'Gas & Fuel',
+            'Groceries',
+            'Pet Food & Supplies',
+            'Restaurants'
+        ]
+        data = csv.DictReader(self.example_month.splitlines())
+        actual_categories = finances.mint_dot_com_list_categories_dict_reader(data)
+        self.assertListEqual(actual_categories, expected_categories)
+
 if __name__ == '__main__':
     unittest.main()
