@@ -15,14 +15,9 @@ import csv
 import datetime
 import re
 
-# '   November 2018\nMo Tu We Th Fr Sa Su\n          1  2  3  4\n 5  6  7  8  9 10 11\n12 13 14 15 16 17 18\n19 20 21 22 23 24 25\n26 27 28 29 30\n'
-def print_calendar_weekly_totals(entries, year, month):
-    cal = calendar.calendar(year, month)
-    # Find the first week day of the month
-    # firstweekday = calendar.monthcalendar(year, month)[0].index(1)
+def calc_weekly_totals(entries, year, month):
     cal_text = calendar.TextCalendar().formatmonth(year, month)
     cal_array = cal_text.split('\n')
-    monthly_total = 0.0
     weekly_totals = []
     for index, week_string in enumerate(cal_array):
         dates = re.findall(r'([0-9]+)', week_string)
@@ -33,12 +28,16 @@ def print_calendar_weekly_totals(entries, year, month):
                 expected_date = '{0}/{1:02d}/{2:02d}'.format(year, month, day)
                 for entry in entries:
                     if entry['Date'] == expected_date:
-                        # print(entry['Amount'])
                         weekly_total += float(entry['Amount'])
-        if index > 1: # and cal_array[index]:
-            # Skip the Month and Weekday lines
+        if index > 1: # Skip the Month and Weekday lines
             weekly_totals.append(weekly_total)
-            monthly_total += weekly_total
+    return weekly_totals
+
+def print_calendar_weekly_totals(entries, year, month):
+    cal_text = calendar.TextCalendar().formatmonth(year, month)
+    cal_array = cal_text.split('\n')
+    weekly_totals = calc_weekly_totals(entries, year, month)
+    monthly_total = sum(weekly_totals)
     highest = max(weekly_totals + [monthly_total])
     highest_len = len('{0:.2f}'.format(highest)) + 2 # Add 2 for the parentheses.
     cal_array[0] = ('{0: <20}  {1: >' + str(highest_len) + '}').format(cal_array[0], '({0:.2f})'.format(monthly_total))
