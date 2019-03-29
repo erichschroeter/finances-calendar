@@ -3,7 +3,7 @@ import csv
 
 from finances import finances
 
-class TestMintWeeklyTotals(unittest.TestCase):
+class TestMintCSVData(unittest.TestCase):
     example_month = """Date,Description,Original Description,Amount,Transaction Type,Category,Account Name,Labels,Notes\n
     11/2/2018,Pick 'n Save,PICK N SAVE #000,5.89,debit,Groceries,testaccount,,\n
     11/2/2018,Pick 'n Save,PICK N SAVE #000,3.96,debit,Groceries,testaccount,,\n
