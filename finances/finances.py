@@ -50,7 +50,14 @@ def print_calendar_weekly_totals(entries, year, month):
     cal_text = '\n'.join(cal_array)
     print(cal_text)
 
-def find_all(csvpath, categories):
+def mint_dot_com_find_all(csvpath, categories):
+    rows = []
+    with open(csvpath) as csvfile:
+        r = csv.DictReader(csvfile)
+        rows = mint_dot_com_find_all_dict_reader(r, categories)
+    return rows
+
+def mint_dot_com_find_all_dict_reader(reader, categories):
     def clean_mint_csv_row(row):
         row_date = re.split('\\/', row['Date'])
         # Mint exports dates formatted as Month/Day/Year
@@ -58,18 +65,16 @@ def find_all(csvpath, categories):
         row['Date'] = date_obj.strftime('%Y/%m/%d')
         return row
     rows = []
-    with open(csvpath) as csvfile:
-        r = csv.DictReader(csvfile)
-        for row in r:
-            if isinstance(categories, list):
-                for category in categories:
-                    if row['Category'] == category:
-                        cleaned_row = clean_mint_csv_row(row)
-                        rows.append(cleaned_row)
-            else:
-                if row['Category'] == categories:
+    for row in reader:
+        if isinstance(categories, list):
+            for category in categories:
+                if row['Category'] == category:
                     cleaned_row = clean_mint_csv_row(row)
                     rows.append(cleaned_row)
+        else:
+            if row['Category'] == categories:
+                cleaned_row = clean_mint_csv_row(row)
+                rows.append(cleaned_row)
     return rows
 
 def calc_sum(entries):
@@ -82,7 +87,7 @@ def main():
     args = docopt.docopt(__doc__, help=True, version='v1.0')
 
     if args['ls']:
-        entries = find_all(args['<csv>'], args['--categories'].split(','))
+        entries = mint_dot_com_find_all(args['<csv>'], args['--categories'].split(','))
         print_calendar_weekly_totals(entries, 2018, 11)
         # print(len(entries))
         sum = calc_sum(entries)
