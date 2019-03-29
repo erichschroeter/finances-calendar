@@ -2,11 +2,13 @@
 Analyze finances.
 
 Usage:
-  finances.py ls [--categories=<categories>] <csv>
+  finances.py cal [--categories=<categories>] [--year=<year>] [--month=<month>] <csv>
 
 Options:
   -h --help                    Print this menu.
   --categories <categories>    The categories to filter by.
+  --year <year>                The year to filter by. [default: 2018]
+  --month <month>              The month to filter by. [default: 11]
 """
 
 import docopt
@@ -34,9 +36,9 @@ def calc_weekly_totals(entries, year, month):
     return weekly_totals
 
 def print_calendar_weekly_totals(entries, year, month):
-    cal_text = calendar.TextCalendar().formatmonth(year, month)
+    cal_text = calendar.TextCalendar().formatmonth(int(year), int(month))
     cal_array = cal_text.split('\n')
-    weekly_totals = calc_weekly_totals(entries, year, month)
+    weekly_totals = calc_weekly_totals(entries, int(year), int(month))
     monthly_total = sum(weekly_totals)
     highest = max(weekly_totals + [monthly_total])
     highest_len = len('{0:.2f}'.format(highest)) + 2 # Add 2 for the parentheses.
@@ -86,12 +88,9 @@ def calc_sum(entries):
 def main():
     args = docopt.docopt(__doc__, help=True, version='v1.0')
 
-    if args['ls']:
+    if args['cal']:
         entries = mint_dot_com_find_all(args['<csv>'], args['--categories'].split(','))
-        print_calendar_weekly_totals(entries, 2018, 11)
-        # print(len(entries))
-        sum = calc_sum(entries)
-        print('{0:.2f}'.format(sum))
+        print_calendar_weekly_totals(entries, args['--year'], args['--month'])
 
 if __name__ == '__main__':
     main()
