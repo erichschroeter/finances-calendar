@@ -108,7 +108,10 @@ def main():
     args = docopt.docopt(__doc__, help=True, version='v1.0')
 
     if args['cal']:
-        entries = mint_dot_com_find_all(args['<csv>'], args['--categories'].split(','))
+        categories = None
+        if args['--categories']:
+            args['--categories'].split(',')
+        entries = mint_dot_com_find_all(args['<csv>'], categories)
         print_calendar_weekly_totals(entries, args['--year'], args['--month'])
     if args['categories']:
         entries = mint_dot_com_find_all(args['<csv>'])
