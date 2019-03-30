@@ -1,5 +1,6 @@
 import unittest
 import csv
+import datetime
 
 from finances import finances
 
@@ -130,6 +131,24 @@ class TestMintCSVData(unittest.TestCase):
         data = csv.DictReader(self.example_data_year_2018.splitlines())
         actual_categories = finances.mint_dot_com_list_categories_dict_reader(data)
         self.assertListEqual(actual_categories, expected_categories)
+
+    def test_find_all_with_filter_between_2018_02_15_and_2018_02_26(self):
+        range_data = self.example_data_header + """2/15/2018,Pick 'n Save,PICK N SAVE #000,2.79,debit,Groceries,testaccount,,
+        2/16/2018,Chick-Fil-A,CHICK-FIL-A #00000,4.57,debit,Fast Food,testaccount,,
+        2/19/2018,Pick 'n Save,PICK N SAVE #000,33.9,debit,Groceries,testaccount,,
+        2/19/2018,Pick 'n Save,PICK N SAVE #000,2.79,debit,Groceries,testaccount,,
+        2/21/2018,Pick 'n Save,PICK N SAVE #000,6.38,debit,Groceries,testaccount,,
+        2/21/2018,Chick-Fil-A,CHICK-FIL-A #00000,7.82,debit,Fast Food,testaccount,,
+        2/22/2018,McDonald's,MCDONALD'S F00000,4.66,debit,Fast Food,testaccount,,
+        2/23/2018,Kwik Trip,KWIK TRIP  00000000000,30.08,debit,Gas & Fuel,testaccount,,
+        2/23/2018,Pick 'n Save,PICK N SAVE #000,33.64,debit,Groceries,testaccount,,
+        2/23/2018,Automatic Received,AUTOMATIC PYMT RECEIVED C_0000,953.07,credit,Credit Card Payment,testaccount,,
+        2/26/2018,AMC,AMC #0000,5.38,debit,Movies & DVDs,testaccount,,"""
+        expected_data = csv.DictReader(range_data.splitlines())
+        data = csv.DictReader(self.example_data_year_2018.splitlines())
+        expected_entries = finances.mint_dot_com_find_all_dict_reader(expected_data)
+        actual_entries = finances.mint_dot_com_find_all_dict_reader(data, start_date=datetime.date(2018, 2, 15), end_date=datetime.date(2018, 2, 26))
+        self.assertListEqual(actual_entries, expected_entries)
 
 if __name__ == '__main__':
     unittest.main()

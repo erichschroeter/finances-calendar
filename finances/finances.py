@@ -53,7 +53,7 @@ def print_calendar_weekly_totals(entries, year, month):
     cal_text = '\n'.join(cal_array)
     print(cal_text)
 
-def mint_dot_com_find_all(csvpath, categories=None):
+def mint_dot_com_find_all(csvpath, categories=None, start_date=None, end_date=None):
     rows = []
     with open(csvpath) as csvfile:
         r = csv.DictReader(csvfile)
@@ -67,7 +67,7 @@ def mint_dot_com_list_categories_dict_reader(reader):
             categories.add(row['Category'])
     return sorted(list(categories))
 
-def mint_dot_com_find_all_dict_reader(reader, categories=None):
+def mint_dot_com_find_all_dict_reader(reader, categories=None, start_date=None, end_date=None):
     def clean_mint_csv_row(row):
         row_date = re.split('\\/', row['Date'])
         # Mint exports dates formatted as Month/Day/Year
@@ -76,15 +76,26 @@ def mint_dot_com_find_all_dict_reader(reader, categories=None):
         return row
     rows = []
     for row in reader:
-        if isinstance(categories, list):
-            for category in categories:
-                if row['Category'] == category:
-                    cleaned_row = clean_mint_csv_row(row)
+        cleaned_row = clean_mint_csv_row(row)
+        is_within_date_range = True
+        date_parts = re.split('\\/', cleaned_row['Date'])
+        the_date = datetime.date(int(date_parts[0]), int(date_parts[1]), int(date_parts[2]))
+
+        if start_date is not None and end_date is not None:
+            is_within_date_range = the_date >= start_date and the_date <= end_date
+        elif start_date is not None:
+            is_within_date_range = the_date >= start_date
+        elif end_date is not None:
+            is_within_date_range = the_date <= end_date
+
+        if is_within_date_range:
+            if isinstance(categories, list):
+                for category in categories:
+                    if row['Category'] == category:
+                        rows.append(cleaned_row)
+            else:
+                if categories is None or row['Category'] == categories:
                     rows.append(cleaned_row)
-        else:
-            if categories is None or row['Category'] == categories:
-                cleaned_row = clean_mint_csv_row(row)
-                rows.append(cleaned_row)
     return rows
 
 def calc_sum(entries):
