@@ -2,14 +2,15 @@
 Analyze finances.
 
 Usage:
-  finances.py cal [--categories=<categories>] [--year=<year>] [--month=<month>] <csv>
+  finances.py cal [--categories=<categories>] [--year=<year>] [--month=<month>] [--columns=<columns>] <csv>
   finances.py categories [--year=<year>] [--month=<month>] <csv>
 
 Options:
   -h --help                    Print this menu.
   --categories <categories>    The categories to filter by.
-  --year <year>                The year to filter by. [default: 2018]
-  --month <month>              The month to filter by. [default: 11]
+  --year <year>                The year or comma-separated list of years to filter by. [default: 0]
+  --month <month>              The month or comma-separated list of months to filter by. [default: 0]
+  --columns <columns>          The number of columns to print per row. [default: 3]
 """
 
 import docopt
@@ -44,6 +45,7 @@ def text_calendar_weekly_totals(entries, year, month):
     highest = max(weekly_totals + [monthly_total])
     highest_len = len('{0:.2f}'.format(highest)) + 2 # Add 2 for the parentheses.
     cal_array[0] = ('{0: <20}  {1: >' + str(highest_len) + '}').format(cal_array[0], '({0:.2f})'.format(monthly_total))
+    cal_array[1] = ('{0: <20}  {1: >' + str(highest_len) + '}').format(cal_array[1], '')
     cal_array[2] = ('{0: <20}  {1: >' + str(highest_len) + '}').format(cal_array[2], '({0:.2f})'.format(weekly_totals[0]))
     cal_array[3] = ('{0: <20}  {1: >' + str(highest_len) + '}').format(cal_array[3], '({0:.2f})'.format(weekly_totals[1]))
     cal_array[4] = ('{0: <20}  {1: >' + str(highest_len) + '}').format(cal_array[4], '({0:.2f})'.format(weekly_totals[2]))
@@ -98,6 +100,14 @@ def mint_dot_com_find_all_dict_reader(reader, categories=None, start_date=None, 
                     rows.append(cleaned_row)
     return rows
 
+def mint_dot_com_list_years(entries):
+    years = set()
+    for entry in entries:
+        if entry['Date']:
+            date_parts = re.split('\\/', entry['Date'])
+            years.add(date_parts[0])
+    return sorted(list(years))
+
 def calc_sum(entries):
     sum = 0.0
     for entry in entries:
@@ -112,7 +122,47 @@ def main():
         if args['--categories']:
             args['--categories'].split(',')
         entries = mint_dot_com_find_all(args['<csv>'], categories)
-        print(text_calendar_weekly_totals(entries, args['--year'], args['--month']))
+        years = mint_dot_com_list_years(entries)
+        if args['--year'] and args['--year'] != '0':
+            years = args['--year'].split(',')
+        months = list(range(1, 13))
+        if args['--month'] and args['--month'] != '0':
+            months = args['--month'].split(',')
+        columns = int(args['--columns'])
+        text_calendars = []
+        for year in years:
+            for month in months:
+                text_calendars.append(text_calendar_weekly_totals(entries, year, month))
+        row_text = ['' for _ in range(7)]
+        i = 1
+        for cal in text_calendars:
+            cal_split = cal.split('\n')
+            row_text[0] += '{0: <40}'.format(cal_split[0])
+            row_text[1] += '{0: <40}'.format(cal_split[1])
+            row_text[2] += '{0: <40}'.format(cal_split[2])
+            row_text[3] += '{0: <40}'.format(cal_split[3])
+            row_text[4] += '{0: <40}'.format(cal_split[4])
+            row_text[5] += '{0: <40}'.format(cal_split[5])
+            row_text[6] += '{0: <40}'.format(cal_split[6])
+            if i % columns == 0:
+                print(row_text[0])
+                print(row_text[1])
+                print(row_text[2])
+                print(row_text[3])
+                print(row_text[4])
+                print(row_text[5])
+                print(row_text[6])
+                print()
+                row_text = ['' for _ in range(7)]
+            i += 1
+        if row_text[0]:
+            print(row_text[0])
+            print(row_text[1])
+            print(row_text[2])
+            print(row_text[3])
+            print(row_text[4])
+            print(row_text[5])
+            print(row_text[6])
     if args['categories']:
         entries = mint_dot_com_find_all(args['<csv>'])
         categories = mint_dot_com_list_categories_dict_reader(entries)
