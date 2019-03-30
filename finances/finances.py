@@ -36,7 +36,7 @@ def calc_weekly_totals(entries, year, month):
             weekly_totals.append(weekly_total)
     return weekly_totals
 
-def print_calendar_weekly_totals(entries, year, month):
+def text_calendar_weekly_totals(entries, year, month):
     cal_text = calendar.TextCalendar().formatmonth(int(year), int(month))
     cal_array = cal_text.split('\n')
     weekly_totals = calc_weekly_totals(entries, int(year), int(month))
@@ -51,7 +51,7 @@ def print_calendar_weekly_totals(entries, year, month):
     cal_array[6] = ('{0: <20}  {1: >' + str(highest_len) + '}').format(cal_array[6], '({0:.2f})'.format(weekly_totals[4]))
     cal_array[7] = ('{0: <20}  {1: >' + str(highest_len) + '}').format(cal_array[7], '({0:.2f})'.format(weekly_totals[5]))
     cal_text = '\n'.join(cal_array)
-    print(cal_text)
+    return cal_text
 
 def mint_dot_com_find_all(csvpath, categories=None, start_date=None, end_date=None):
     rows = []
@@ -112,7 +112,7 @@ def main():
         if args['--categories']:
             args['--categories'].split(',')
         entries = mint_dot_com_find_all(args['<csv>'], categories)
-        print_calendar_weekly_totals(entries, args['--year'], args['--month'])
+        print(text_calendar_weekly_totals(entries, args['--year'], args['--month']))
     if args['categories']:
         entries = mint_dot_com_find_all(args['<csv>'])
         categories = mint_dot_com_list_categories_dict_reader(entries)
