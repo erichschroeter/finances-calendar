@@ -120,7 +120,7 @@ def main():
     if args['cal']:
         categories = None
         if args['--categories']:
-            args['--categories'].split(',')
+            categories = args['--categories'].split(',')
         entries = mint_dot_com_find_all(args['<csv>'], categories)
         years = mint_dot_com_list_years(entries)
         if args['--year'] and args['--year'] != '0':
